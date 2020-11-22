@@ -1,57 +1,65 @@
-# Project Name
+# KeyRotationSample
+Sample .net core web api to reactively handle secret key rotation in keyvault.
 
-(short, 1-3 sentenced, description of the project)
+## Pre-Requisites
+You need to have following azure resources
 
-## Features
+* Storage Account
+* Cosmos DB
+* Key Vault
 
-This project framework provides the following features:
+### Add the following secrets with corresponding values to your KeyVault:
+* CosmosUrl        (Value should be your cosmos account URI)
+* CosmosKey        (Value should be your cosmos account primary key)
+* CosmosDatabase   (Value should be name of your cosmos database)
+* CosmosCollection (Value should be name of your cosmos db collection)
+* BlobConnection   (Value should be your storage account connection string, not just the key.)
 
-* Feature 1
-* Feature 2
-* ...
+Note: Some sample data is expected in cosmos collection, query used in the CosmosDBService expects a property called "title" in your documents e.g:
+```json
+{
+  "id":"12345",
+  "title":"sample book 1"
+}
+```
 
-## Getting Started
+If you want to run it on your existing data then change the query accordingly in /DataAccess/CosmosDbService.cs class at line #19
+```
+string sqlQuery = "select value c.title from c";
+```
+Also you need to have container with some sample files in it.
 
-### Prerequisites
+### Running sample code
+1. Open the KeyRotationSample.sln file in visual studio
+2. In appsettings.json file provide the name of your KeyVault
 
-(ideally very short, if any)
+```
+Replace <YOUR-KEYVAULT-NAME> with your key vault name.
+KeyVaultUrl": "https://<YOUR-KEYVAULT-NAME>.vault.azure.net/
+```
 
-- OS
-- Library version
-- ...
+3. Configure [Azure service authentication](https://docs.microsoft.com/en-us/azure/key-vault/general/service-to-service-authentication#:~:text=Authenticating%20with%20Visual%20Studio,local%20development%2C%20and%20select%20OK.) in Visual Studio.
 
-### Installation
+![Azure Service Authentication](azure-service-auth.png)
 
-(ideally very short)
+4. Run the solution.
 
-- npm install [package name]
-- mvn install
-- ...
+There are two endpoints in the sample controller:
 
-### Quickstart
-(Add steps to get up and running quickly)
+```
+http://localhost:5000/api/KeyRotationSample
+```
+This returns data from cosmos db collection
 
-1. git clone [repository clone url]
-2. cd [respository name]
-3. ...
+```
+http://localhost:5000/api/KeyRotationSample/blobs/{containername}
+```
+This provides list of blob files in the given controller.
 
+5. Hit those end points to validate data is retrieved.
 
-## Demo
+6. Leave the app running and go ahead to rotate the cosmos and storage keys.
 
-A demo app is included to show how to use the project.
+7. Update CosmosKey and BlobConnection secret values in KeyVault with new values.
 
-To run the demo, follow these steps:
-
-(Add steps to start up the demo)
-
-1.
-2.
-3.
-
-## Resources
-
-(Any additional resources or related projects)
-
-- Link to supporting information
-- Link to similar sample
-- ...
+8. Hit the end points again and this time Polly retry policies will refresh the cosmos and storage services with new secret values and your app will continue to work without any down time and without any manual interruption.
