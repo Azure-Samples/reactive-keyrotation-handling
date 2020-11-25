@@ -3,7 +3,7 @@ Secret key rotation is a common process in production applications where organiz
 
 When the new rotated keys are updated to KeyVault, the consuming apps start failing as the secrets used are not valid anymore, so either we must restart our apps or programmers implement long polling to KeyVault to do a periodic secret refresh. Both approaches are not efficient as the first one requires manual intervention or some sort of custom app that can trigger an app restart when keys get rotated and in the second one if you poll too frequently then it will add to unnecessary KeyVault cost and if you do it with a longer duration then your app can have a downtime.
 
-This code sample addresses this problem, i have considered Cosmos and Storage account services as exmples but you can extend it for other services as well.
+This code sample addresses this problem, here Cosmos DB and Storage account services have been considered as exmples, but you can extend it for other services as well.
 
 ## Pre-Requisites
 You need to have following azure resources
