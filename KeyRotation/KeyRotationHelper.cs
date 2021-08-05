@@ -71,26 +71,26 @@ namespace KeyRotationSample.KeyRotation
         private AsyncRetryPolicy GetBlobRetryPolicy()
         {
             return Policy.Handle<RequestFailedException>(e => (e.Status == (int)HttpStatusCode.Unauthorized || e.Status == (int)HttpStatusCode.Forbidden))
-                .RetryAsync(1, async (exception, retryCount) =>
-                {
-                    try
-                    {
-                        await semaphoreSlim.WaitAsync().ConfigureAwait(false);
-                        logger.LogInformation("Read the blob connection from KeyVault.");
+               .RetryAsync(1, async (exception, retryCount) =>
+              {
+                  try
+                  {
+                      await semaphoreSlim.WaitAsync().ConfigureAwait(false);
+                      logger.LogInformation("Read the blob connection from KeyVault.");
 
-                        // Get the latest blob connection key.
-                        var blobConnectionSecret = await client.GetSecretAsync("secretName").ConfigureAwait(false);
+                      // Get the latest blob connection key.
+                      var blobConnectionSecret = await client.GetSecretAsync("secretName").ConfigureAwait(false);
 
 
-                        logger.LogInformation("Refresh blob storage connection with upadated secret.");
-                        blobStorageService.RefreshBlobServiceClient(blobConnectionSecret.Value.Value);
-                    }
-                    finally
-                    {
-                        // release the semaphore
-                        semaphoreSlim.Release();
-                    }
-                });
+                      logger.LogInformation("Refresh blob storage connection with upadated secret.");
+                      blobStorageService.RefreshBlobServiceClient(blobConnectionSecret.Value.Value);
+                  }
+                  finally
+                  {
+                      // release the semaphore
+                      semaphoreSlim.Release();
+                  }
+              });
         }
     }
 }
