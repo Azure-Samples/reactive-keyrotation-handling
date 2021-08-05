@@ -43,25 +43,25 @@ namespace KeyRotationSample.KeyRotation
         private AsyncRetryPolicy GetCosmosRetryPolicy()
         {
             return Policy.Handle<CosmosException>(e => e.StatusCode == HttpStatusCode.Unauthorized)
-                 .RetryAsync(1, async (exception, retryCount) =>
-                  {
-                      try
-                      {
-                          await semaphoreSlim.WaitAsync().ConfigureAwait(false);
-                          logger.LogInformation("Read the cosmos key from KeyVault.");
+                .RetryAsync(1, async (exception, retryCount) =>
+                {
+                    try
+                    {
+                        await semaphoreSlim.WaitAsync().ConfigureAwait(false);
+                        logger.LogInformation("Read the cosmos key from KeyVault.");
 
-                          // Get the latest cosmos key.
-                          var cosmosKeySecret = await client.GetSecretAsync("secretName").ConfigureAwait(false);
+                        // Get the latest cosmos key.
+                        var cosmosKeySecret = await client.GetSecretAsync("secretName").ConfigureAwait(false);
 
-                          logger.LogInformation("Refresh cosmos connection with upadated secret.");
-                          cosmosDbService.Reconnect(new Uri(configuration[Constants.CosmosUrl]), cosmosKeySecret.Value.Value, configuration[Constants.CosmosDatabase], configuration[Constants.CosmosCollection]);
-                      }
-                      finally
-                      {
-                          // release the semaphore
-                          semaphoreSlim.Release();
-                      }
-                  });
+                        logger.LogInformation("Refresh cosmos connection with upadated secret.");
+                        cosmosDbService.Reconnect(new Uri(configuration[Constants.CosmosUrl]), cosmosKeySecret.Value.Value, configuration[Constants.CosmosDatabase], configuration[Constants.CosmosCollection]);
+                    }
+                    finally
+                    {
+                        // release the semaphore
+                        semaphoreSlim.Release();
+                    }
+                });
         }
 
         // <summary>
