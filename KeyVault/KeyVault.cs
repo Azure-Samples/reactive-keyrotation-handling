@@ -1,33 +1,26 @@
-﻿using Microsoft.Azure.KeyVault;
-using Microsoft.Azure.Services.AppAuthentication;
+﻿using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using System;
 
 namespace KeyRotationSample.KeyVault
 {
     public static class KeyVault
     {
-        public static KeyVaultClient GetKeyVaultClient()
+        public static SecretClient GetSecretClient()
         {
-
-            //string authString = "RunAs=App"; use this with managed identity on production
-            
-            //For dev env.
-            string authString = "RunAs=Developer; DeveloperTool=VisualStudio"; // you can also use "RunAs=Developer; DeveloperTool=AzureCli"
-
-            KeyVaultClient keyVaultClient;
+            SecretClient secretClient;
             try
             {
-                AzureServiceTokenProvider tokenProvider = new AzureServiceTokenProvider(authString);
-                keyVaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(tokenProvider.KeyVaultTokenCallback));                
+                secretClient = new SecretClient(new Uri("KeyVaultUrl"), new DefaultAzureCredential());
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"KeyVaultException: {ex}");
-                keyVaultClient = null;
+                secretClient = null;
             }
 
             // return the client
-            return keyVaultClient;
+            return secretClient;
 
         }
     }

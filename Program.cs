@@ -1,13 +1,13 @@
-using System;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Azure.KeyVault;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Configuration.AzureKeyVault;
-using Microsoft.Extensions.DependencyInjection;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using KeyRotationSample.BlobAccess;
 using KeyRotationSample.DataAccess;
 using KeyRotationSample.KeyRotation;
-using KeyRotationSample.BlobAccess;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System;
 
 namespace KeyRotationSample
 {
@@ -20,7 +20,7 @@ namespace KeyRotationSample
 
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
-            KeyVaultClient keyVaultClient=null;
+            SecretClient secretClient = null;
             IConfigurationRoot configurationRoot = null;
             return Host.CreateDefaultBuilder(args)
                   .ConfigureAppConfiguration((context, config) =>
@@ -31,10 +31,10 @@ namespace KeyRotationSample
                   
                       if (!string.IsNullOrEmpty(vaultUrl))
                       {
-                         keyVaultClient = KeyVault.KeyVault.GetKeyVaultClient();
+                          secretClient = KeyVault.KeyVault.GetSecretClient();
                          
                          // Add azurekey vault configurations to configuration store. 
-                         config.AddAzureKeyVault(vaultUrl, keyVaultClient, new DefaultKeyVaultSecretManager());
+                         config.AddAzureKeyVault(new Uri(vaultUrl), new DefaultAzureCredential());
                          configurationRoot = config.Build();
                       }
                       else
@@ -44,7 +44,7 @@ namespace KeyRotationSample
                   })
                   .ConfigureServices(services =>
                   {
-                      services.AddSingleton<IKeyVaultClient>(keyVaultClient);
+                      services.AddSingleton<SecretClient>(secretClient);
                       
                       // Add cosmos service as singleton
                       services.AddSingleton<ICosmosDbService>(new CosmosDbService(
