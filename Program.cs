@@ -1,3 +1,4 @@
+using System;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using KeyRotationSample.BlobAccess;
@@ -7,7 +8,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
 
 namespace KeyRotationSample
 {
@@ -31,8 +31,8 @@ namespace KeyRotationSample
                   
                       if (!string.IsNullOrEmpty(vaultUrl))
                       {
-                          secretClient = KeyVault.KeyVault.GetSecretClient();
-                         
+                          secretClient = new SecretClient(new Uri(vaultUrl), new DefaultAzureCredential());
+
                          // Add azurekey vault configurations to configuration store. 
                          config.AddAzureKeyVault(new Uri(vaultUrl), new DefaultAzureCredential());
                          configurationRoot = config.Build();
