@@ -1,4 +1,5 @@
 using System;
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using KeyRotationSample.BlobAccess;
@@ -31,11 +32,12 @@ namespace KeyRotationSample
                   
                       if (!string.IsNullOrEmpty(vaultUrl))
                       {
+                          //var credential = new DefaultAzureCredential();
                           secretClient = new SecretClient(new Uri(vaultUrl), new DefaultAzureCredential());
 
-                         // Add azurekey vault configurations to configuration store. 
-                         config.AddAzureKeyVault(new Uri(vaultUrl), new DefaultAzureCredential());
-                         configurationRoot = config.Build();
+                          // Add azurekey vault configurations to configuration store. 
+                          config.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
+                          configurationRoot = config.Build();
                       }
                       else
                       {
