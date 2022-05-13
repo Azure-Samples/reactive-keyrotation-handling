@@ -51,7 +51,7 @@ namespace KeyRotationSample.KeyRotation
                         logger.LogInformation("Read the cosmos key from KeyVault.");
 
                         // Get the latest cosmos key.
-                        var cosmosKeySecret = await client.GetSecretAsync("secretName").ConfigureAwait(false);
+                        var cosmosKeySecret = await client.GetSecretAsync(Constants.CosmosKey).ConfigureAwait(false);
 
                         logger.LogInformation("Refresh cosmos connection with upadated secret.");
                         cosmosDbService.Reconnect(new Uri(configuration[Constants.CosmosUrl]), cosmosKeySecret.Value.Value, configuration[Constants.CosmosDatabase], configuration[Constants.CosmosCollection]);
@@ -79,7 +79,7 @@ namespace KeyRotationSample.KeyRotation
                         logger.LogInformation("Read the blob connection from KeyVault.");
 
                         // Get the latest blob connection key.
-                        var blobConnectionSecret = await client.GetSecretAsync("secretName").ConfigureAwait(false);
+                        var blobConnectionSecret = await client.GetSecretAsync(Constants.BlobConnection).ConfigureAwait(false);
 
 
                         logger.LogInformation("Refresh blob storage connection with upadated secret.");
